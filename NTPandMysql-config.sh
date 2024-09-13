@@ -20,7 +20,7 @@ echo "Creating the backup of the original file"
 cp $CONFIG_FILE $CONFIG_FILE.bak
  
 echo "Updating /etc/chrony/chrony.conf..."
-sudo bash -c "cat <<EOF > $CONFIG_FILE
+sudo bash -c "cat <<EOF >> $CONFIG_FILE
 # Use public servers from the pool.ntp.org project.
 server $NTP_SERVER iburst
 
@@ -94,7 +94,7 @@ CONFIG_FILE_etcd="/etc/default/etcd"
 cp $CONFIG_FILE_etcd $CONFIG_FILE_etcd.bak
 
 echo "Updating /etc/default/etcd..."
-sudo bash -c "cat <<EOF > $CONFIG_FILE_mem
+sudo bash -c "cat <<EOF >> $CONFIG_FILE_etcd
 ETCD_NAME=\"controller\"
 ETCD_DATA_DIR=\"/var/lib/etcd\"
 ETCD_INITIAL_CLUSTER_STATE=\"new\"

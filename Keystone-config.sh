@@ -32,19 +32,57 @@ sudo apt install keystone
 config_file="/etc/keystone/keystone.conf"
 cp $config_file $config_file.bak
 
-sudo bash -c "cat <<EOF > $config_file
-# Update the [database] section
-sed -i "/^\[database\]/,/^connection/ s|^connection *=.*|connection = mysql+pymysql://keystone:k123@controller/keystone|" $config_file
+# Define the new connection string and token provider
+NEW_DB_CONNECTION="connection = mysql+pymysql://keystone:k123@controller/keystone"
+NEW_TOKEN_PROVIDER="provider = fernet"
 
-# Update the [token] section
-sed -i "/^\[token\]/,/^provider/ s|^provider *=.*|provider = fernet|" $CONFIG_FILE
+# Edit the [database] section: comment out existing 'connection' lines and add the new connection string
+sed -i.bak '/^\[database\]/,/^\[/ {
+    /^\[database\]/!b
+    :a
+    N
+    /^\[/!ba
+    s/^connection = .*/# &/
+    i\
+'"$NEW_DB_CONNECTION"'
+}' "$config_file"
 
-# Check if the updates were successful
-if [ $? -eq 0 ]; then
-    echo "Database configuration in $CONFIG_FILE updated successfully!"
-else
-    echo "Failed to update the database configuration."
-fi
-EOF
-"
-echo "file updated"
+# Edit the [token] section: comment out existing 'provider' lines and set the new token provider
+sed -i.bak '/^\[token\]/,/^\[/ {
+    /^\[token\]/!b
+    :a
+    N
+    /^\[/!ba
+    s/^provider = .*/# &/
+    i\
+'"$NEW_TOKEN_PROVIDER"'
+}' "$cofig_file"
+
+# Inform the user
+echo "Keystone configuration updated successfully!"
+
+#Populate the Identity service database:
+su -s /bin/sh -c "keystone-manage db_sync" keystone
+echo "database populated..."
+
+#Initialize Fernet key repositories:
+keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+echo "Keys initialized successfully"
+
+#Bootstrap the Identity service:
+keystone-manage bootstrap --bootstrap-password A123 \
+  --bootstrap-admin-url http://controller:5000/v3/ \
+  --bootstrap-internal-url http://controller:5000/v3/ \
+  --bootstrap-public-url http://controller:5000/v3/ \
+  --bootstrap-region-id RegionOne
+echo "bootstraping the identity service successfully."
+
+conf="/etc/apache2/apache2.conf"
+sudo bash -c "cat <<EOF > $conf
+ServerName controller"
+
+echo "apache updated successfully"
+
+# restart the service
+service apache2 restart

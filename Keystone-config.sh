@@ -30,7 +30,7 @@ sudo apt install keystone -y
 
 #keystone configuration
 config_file="/etc/keystone/keystone.conf"
-cp $config_file $config_file.bak
+# cp $config_file $config_file.bak
 
 # Define the new connection string and token provider
 NEW_DB_CONNECTION="connection = mysql+pymysql://keystone:k123@controller/keystone"
@@ -38,7 +38,8 @@ NEW_TOKEN_PROVIDER="provider = fernet"
 
 if [ -f "$config_file" ]; then
 	echo "Updatng $config_file"
-	
+	sudo cp $config_file $config_file.bak
+ 
 	# Check if the [database] section exists
 	if grep -q "^\[database\]" "$config_file"; then
 	    echo "[database] section found in $config_file"
@@ -48,13 +49,7 @@ if [ -f "$config_file" ]; then
 		echo "Existing connection string found, commenting it out"
 		
 		# Comment out the existing connection string
-		sudo sed -i.bak '/^\[database\]/,/^\[/ {
-		    /^\[database\]/!b
-		    :a
-		    N
-		    /^\[/!ba
-		    s/^\([[:space:]]*connection[[:space:]]*=.*\)/# \1/
-		}' "$config_file"
+		sudo sed -i "s/^.*connection = .*/# &/" "$config_file"
 	    else
 		echo "No existing connection string found in the [database] section"
 	    fi
@@ -80,13 +75,7 @@ if [ -f "$config_file" ]; then
 		echo "Existing provider string found, commenting it out"
 		
 		# Comment out the existing connection string
-		sudo sed -i.bak '/^\[token\]/,/^\[/ {
-		    /^\[token\]/!b
-		    :a
-		    N
-		    /^\[/!ba
-		    s/^\([[:space:]]*provider[[:space:]]*=.*\)/# \1/
-		}' "$config_file"
+		sudo sed -i.bak "s/^.*provider = .*/# &/" "$config_file"
 	    else
 		echo "No existing provider string found in the [token] section"
 	    fi

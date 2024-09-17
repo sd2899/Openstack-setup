@@ -69,7 +69,8 @@ default_conf="use_keystone_quotas = True"
 
 if [ -f "$config_file" ]; then
 	echo "Updatng $config_file"
-	
+	sudo cp $config_file $config_file.bak
+ 
 	# Check if the [database] section exists
 	if grep -q "^\[database\]" "$config_file"; then
 	    echo "[database] section found in $config_file"

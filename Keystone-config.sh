@@ -81,9 +81,24 @@ echo "bootstraping the identity service successfully."
 
 conf="/etc/apache2/apache2.conf"
 sudo bash -c "cat <<EOF > $conf
-ServerName controller"
+ServerName controller
+EOF"
 
 echo "apache updated successfully"
 
 # restart the service
 service apache2 restart
+
+cat <<EOF > /home/admin-openrc
+export OS_USERNAME=admin
+export OS_PASSWORD=A123
+export OS_PROJECT_NAME=admin
+export OS_USER_DOMAIN_NAME=Default
+export OS_PROJECT_DOMAIN_NAME=Default
+export OS_AUTH_URL=http://controller:5000/v3
+export OS_IDENTITY_API_VERSION=3
+EOF
+echo "admin-openrc created successfully"
+
+chmod +x admin-openrc
+. admin-openrc

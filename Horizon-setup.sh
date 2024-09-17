@@ -10,24 +10,69 @@ config_file="/etc/openstack-dashboard/local_settings.py"
 sudo cp $config_file $config_file.bak
 echo "backup completed successfully"
 
+# Configure the dashboard to use OpenStack services on the controller node.
+sudo sed -i "s/^.*OPENSTACK_HOST = .*/# &/" "$config_file"
+echo "OPENSTACK_HOST = "controller" " >> $config_file
+
+#In the Dashboard configuration section, allow your hosts to access Dashboard.
+sudo sed -i "s/^.*ALLOWED_HOSTS = .*/# &/" "$config_file"
+echo "ALLOWED_HOSTS = ["*"] " >> $confg_file
+
+#Configure the memcached session storage service:
+sudo sed -i "s/^.*SESSION_ENGINE = .*/# &/" "$config_file"
+echo "SESSION_ENGINE = 'django.contrib.sessions.backends.cache'" >> $config_file
+
+NEW_BACKEND="django.core.cache.backends.memcached.MemcachedCache"
+NEW_LOCATION="controller:11211"
+
+# Check if the 'CACHES' section exists
+if grep -q "CACHES" "$config_file"; then
+    echo "CACHES section found in $config_file"
+
+    # Update the BACKEND value in the CACHES section
+    if grep -q "'BACKEND':" "$config_file"; then
+        echo "Updating BACKEND value"
+        sudo sed -i.bak "s/'BACKEND':.*/'BACKEND': '$NEW_BACKEND',/" "$config_file"
+    else
+        echo "BACKEND key not found, adding it"
+        sudo sed -i.bak "/CACHES = {/,/}/ s/\('default':.*\)/\1\n\t\t'BACKEND': '$NEW_BACKEND',/" "$config_file"
+    fi
+
+    # Update the LOCATION value in the CACHES section
+    if grep -q "'LOCATION':" "$config_file"; then
+        echo "Updating LOCATION value"
+        sudo sed -i.bak "s/'LOCATION':.*/'LOCATION': '$NEW_LOCATION'/" "$config_file"
+    else
+        echo "LOCATION key not found, adding it"
+        sudo sed -i.bak "/CACHES = {/,/}/ s/\('default':.*\)/\1\n\t\t'LOCATION': '$NEW_LOCATION'/" "$config_file"
+    fi
+
+else
+    echo "CACHES section not found in $config_file"
+fi
+
+echo "Cache configuration update complete."
+
+# Enable the Identity API version
+sudo sed -i "s/^.*OPENSTACK_KEYSTONE_URL = .*/# &/" "$config_file"
+echo "OPENSTACK_KEYSTONE_URL = "http://%s:5000/v3" % OPENSTACK_HOST" >> $confg_file
+
+# configure the time zone
+sudo sed -i "s/^.*TIME_ZONE = .*/# &/" "$config_file"
+echo "TIME_ZONE = "Asia/Kolkata"" >> $confg_file
+
+# Configure theme
+sudo sed -i "s/^.*DEFAULT_THEME = .*/# &/" "$config_file"
+echo "DEFAULT_THEME = 'ubuntu' " >> $confg_file
+
+# configure the webroot
+sudo sed -i "s/^.*WEBROOT = .*/# &/" "$config_file"
+echo "WEBROOT='/horizon/'" >> $confg_file
+
+# Enable support for domains:
+echo "OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True" >> $config_file
+
 sudo bash -c "cat <<EOF >> $config_file
-OPENSTACK_HOST = "controller"
-ALLOWED_HOSTS = ["*"]
-
-# Configure the memcached session storage service:
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-CACHES = {
-	'default': {
-     	'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-     	'LOCATION': 'controller:11211',
-	}
-}
-
-SITE_BRANDING = "C3iHUb OpenCloud"
-HORIZON_CONFIG["help_url"] = "#"
-OPENSTACK_KEYSTONE_URL = "http://%s:5000/v3" % OPENSTACK_HOST
-
-OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True
 OPENSTACK_API_VERSIONS = {
     "identity": 3,
     "image": 2,
@@ -36,6 +81,7 @@ OPENSTACK_API_VERSIONS = {
 
 OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = "Default"
 OPENSTACK_KEYSTONE_DEFAULT_ROLE = "user"
+
 OPENSTACK_NEUTRON_NETWORK = {
 	#...
 	'enable_router': True,
@@ -45,14 +91,6 @@ OPENSTACK_NEUTRON_NETWORK = {
 	'enable_ha_router': True,
 	'enable_fip_topology_check': True,
 }
-ENABLE_VOLUME = True;
-ENABLE_VOLUME_TYPES = True;
-OPENSTACK_SWIFT_ENABLED = True;
-
- TIME_ZONE = "Asia/Kolkata"
- DEFAULT_THEME = 'ubuntu'
- WEBROOT='/horizon/'
-ALLOWED_HOSTS = ['*']
 
 EOF"
 
@@ -63,4 +101,3 @@ EOF"
 
 #Reload the web server configuration:
 systemctl reload apache2.service
-

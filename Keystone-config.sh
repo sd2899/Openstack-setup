@@ -26,7 +26,7 @@ fi
 echo "Database setup completed"
 
 # install the package
-sudo apt install keystone
+sudo apt install keystone -y
 
 #keystone configuration
 config_file="/etc/keystone/keystone.conf"
@@ -53,7 +53,7 @@ if [ -f "$config_file" ]; then
 		    :a
 		    N
 		    /^\[/!ba
-		    s/^connection = .*/# &/
+		    s/^\([[:space:]]*connection[[:space:]]*=.*\)/# \1/
 		}' "$config_file"
 	    else
 		echo "No existing connection string found in the [database] section"
@@ -85,7 +85,7 @@ if [ -f "$config_file" ]; then
 		    :a
 		    N
 		    /^\[/!ba
-		    s/^provider = .*/# &/
+		    s/^\([[:space:]]*provider[[:space:]]*=.*\)/# \1/
 		}' "$config_file"
 	    else
 		echo "No existing provider string found in the [token] section"

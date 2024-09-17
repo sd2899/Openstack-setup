@@ -3,7 +3,7 @@
 # Keystone installation
 
 # Create Keystone database and grant previleges
-DB_ROOT_PASS="123"  # Replace with your MariaDB/MySQL root password
+DB_ROOT_PASS="123"  # Replace with your MariaDB/MySQL root passwor
 # Create the SQL commands to be executed
 SQL_COMMANDS=$(cat <<EOF
 CREATE DATABASE keystone;
@@ -14,7 +14,7 @@ EOF
 )
 
 # Run the SQL commands as root
-echo "Setting up nova databases and granting privileges..."
+echo "Setting up keystone databases and granting privileges..."
 
 mysql -uroot -p"$DB_ROOT_PASS" -e "$SQL_COMMANDS"
 
@@ -27,7 +27,6 @@ echo "Database setup completed"
 
 # install the package
 sudo apt install keystone
-sleep 20
 
 #keystone configuration
 config_file="/etc/keystone/keystone.conf"
@@ -37,28 +36,76 @@ cp $config_file $config_file.bak
 NEW_DB_CONNECTION="connection = mysql+pymysql://keystone:k123@controller/keystone"
 NEW_TOKEN_PROVIDER="provider = fernet"
 
-# Edit the [database] section: comment out existing 'connection' lines and add the new connection string
-sed -i.bak '/^\[database\]/,/^\[/ {
-    /^\[database\]/!b
-    :a
-    N
-    /^\[/!ba
-    s/^connection = .*/# &/
-    i\
-'"$NEW_DB_CONNECTION"'
-}' "$config_file"
+if [ -f "$config_file" ]; then
+	echo "Updatng $config_file"
+	
+	# Check if the [database] section exists
+	if grep -q "^\[database\]" "$config_file"; then
+	    echo "[database] section found in $config_file"
 
-# Edit the [token] section: comment out existing 'provider' lines and set the new token provider
-sed -i.bak '/^\[token\]/,/^\[/ {
-    /^\[token\]/!b
-    :a
-    N
-    /^\[/!ba
-    s/^provider = .*/# &/
-    i\
-'"$NEW_TOKEN_PROVIDER"'
-}' "$cofig_file"
+	    # Check if there is already a connection string in the [database] section
+	    if grep -A1 "^\[database\]" "$config_file" | grep -q "^connection ="; then
+		echo "Existing connection string found, commenting it out"
+		
+		# Comment out the existing connection string
+		sudo sed -i.bak '/^\[database\]/,/^\[/ {
+		    /^\[database\]/!b
+		    :a
+		    N
+		    /^\[/!ba
+		    s/^connection = .*/# &/
+		}' "$config_file"
+	    else
+		echo "No existing connection string found in the [database] section"
+	    fi
 
+	    # Add the new connection string below the [database] section
+	    sudo sed -i "/^\[database\]/a$NEW_DB_CONNECTION" "$config_file"
+	    echo "New connection string added to [database] section"
+
+	else
+	    echo "[database] section not found in $config_file"
+	    echo "Adding the [database] section and new connection string"
+
+    	# If the [database] section doesn't exist, append it to the config file
+    	echo -e "\n[database]\n$NEW_DB_CONNECTION" | sudo tee -a "$config_file"
+	fi
+	
+	# editing the token section
+	if grep -q "^\[token\]" "$config_file"; then
+	    echo "[token] section found in $config_file"
+
+	    # Check if there is already a connection string in the [database] section
+	    if grep -A1 "^\[token\]" "$config_file" | grep -q "^provider ="; then
+		echo "Existing provider string found, commenting it out"
+		
+		# Comment out the existing connection string
+		sudo sed -i.bak '/^\[token\]/,/^\[/ {
+		    /^\[token\]/!b
+		    :a
+		    N
+		    /^\[/!ba
+		    s/^provider = .*/# &/
+		}' "$config_file"
+	    else
+		echo "No existing provider string found in the [token] section"
+	    fi
+
+	    # Add the new provider string below the [token] section
+	    sudo sed -i "/^\[token\]/a$NEW_TOKEN_PROVIDER" "$config_file"
+	    echo "New connection string added to [token] section"
+
+	else
+	    echo "[token] section not found in $config_file"
+	    echo "Adding the [token] section and new connection string"
+
+    	# If the [token] section doesn't exist, append it to the config file
+    	echo -e "\n[token]\n$NEW_TOKEN_PROVIDER" | sudo tee -a "$config_file"
+	fi
+else
+    echo "keystone configuration file $config_file not found. Exiting..."
+    exit 1
+fi
 # Inform the user
 echo "Keystone configuration updated successfully!"
 
@@ -80,16 +127,15 @@ keystone-manage bootstrap --bootstrap-password A123 \
 echo "bootstraping the identity service successfully."
 
 conf="/etc/apache2/apache2.conf"
-sudo bash -c "cat <<EOF > $conf
-ServerName controller
-EOF"
+sudo bash -c "cat <<EOF >> $conf
+ServerName controller"
 
 echo "apache updated successfully"
 
 # restart the service
 service apache2 restart
 
-cat <<EOF > /home/admin-openrc
+cat <<EOF > /home/openstack/admin-openrc
 export OS_USERNAME=admin
 export OS_PASSWORD=A123
 export OS_PROJECT_NAME=admin

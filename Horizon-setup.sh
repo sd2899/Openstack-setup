@@ -12,11 +12,11 @@ echo "backup completed successfully"
 
 # Configure the dashboard to use OpenStack services on the controller node.
 sudo sed -i "s/^.*OPENSTACK_HOST = .*/# &/" "$config_file"
-echo "OPENSTACK_HOST = "controller" " >> $config_file
+echo 'OPENSTACK_HOST = "controller" ' >> $config_file
 
 #In the Dashboard configuration section, allow your hosts to access Dashboard.
 sudo sed -i "s/^.*ALLOWED_HOSTS = .*/# &/" "$config_file"
-echo "ALLOWED_HOSTS = ["*"] " >> $confg_file
+echo "ALLOWED_HOSTS = ["*"] " >> $config_file
 
 #Configure the memcached session storage service:
 sudo sed -i "s/^.*SESSION_ENGINE = .*/# &/" "$config_file"
@@ -32,19 +32,19 @@ if grep -q "CACHES" "$config_file"; then
     # Update the BACKEND value in the CACHES section
     if grep -q "'BACKEND':" "$config_file"; then
         echo "Updating BACKEND value"
-        sudo sed -i.bak "s/'BACKEND':.*/'BACKEND': '$NEW_BACKEND',/" "$config_file"
+        sudo sed -i "s/'BACKEND':.*/'BACKEND': '$NEW_BACKEND',/" "$config_file"
     else
         echo "BACKEND key not found, adding it"
-        sudo sed -i.bak "/CACHES = {/,/}/ s/\('default':.*\)/\1\n\t\t'BACKEND': '$NEW_BACKEND',/" "$config_file"
+        sudo sed -i "/CACHES = {/,/}/ s/\('default':.*\)/\1\n\t\t'BACKEND': '$NEW_BACKEND',/" "$config_file"
     fi
 
     # Update the LOCATION value in the CACHES section
     if grep -q "'LOCATION':" "$config_file"; then
         echo "Updating LOCATION value"
-        sudo sed -i.bak "s/'LOCATION':.*/'LOCATION': '$NEW_LOCATION'/" "$config_file"
+        sudo sed -i "s/'LOCATION':.*/'LOCATION': '$NEW_LOCATION'/" "$config_file"
     else
         echo "LOCATION key not found, adding it"
-        sudo sed -i.bak "/CACHES = {/,/}/ s/\('default':.*\)/\1\n\t\t'LOCATION': '$NEW_LOCATION'/" "$config_file"
+        sudo sed -i "/CACHES = {/,/}/ s/\('default':.*\)/\1\n\t\t'LOCATION': '$NEW_LOCATION'/" "$config_file"
     fi
 
 else
@@ -55,19 +55,19 @@ echo "Cache configuration update complete."
 
 # Enable the Identity API version
 sudo sed -i "s/^.*OPENSTACK_KEYSTONE_URL = .*/# &/" "$config_file"
-echo "OPENSTACK_KEYSTONE_URL = "http://%s:5000/v3" % OPENSTACK_HOST" >> $confg_file
+echo 'OPENSTACK_KEYSTONE_URL = "http://%s:5000/v3" % OPENSTACK_HOST' >> $config_file
 
 # configure the time zone
 sudo sed -i "s/^.*TIME_ZONE = .*/# &/" "$config_file"
-echo "TIME_ZONE = "Asia/Kolkata"" >> $confg_file
+echo 'TIME_ZONE = "Asia/Kolkata"' >> $config_file
 
 # Configure theme
 sudo sed -i "s/^.*DEFAULT_THEME = .*/# &/" "$config_file"
-echo "DEFAULT_THEME = 'ubuntu' " >> $confg_file
+echo "DEFAULT_THEME = 'ubuntu' " >> $config_file
 
 # configure the webroot
 sudo sed -i "s/^.*WEBROOT = .*/# &/" "$config_file"
-echo "WEBROOT='/horizon/'" >> $confg_file
+echo "WEBROOT='/horizon/'" >> $config_file
 
 # Enable support for domains:
 echo "OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True" >> $config_file
@@ -95,7 +95,7 @@ OPENSTACK_NEUTRON_NETWORK = {
 EOF"
 
 conf_file1="/etc/apache2/conf-available/openstack-dashboard.conf"
-sudo bash -c "cat <<EOF >> $config_file1
+sudo bash -c "cat <<EOF >> $conf_file1
 WSGIApplicationGroup %{GLOBAL}
 EOF"
 

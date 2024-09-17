@@ -3,7 +3,7 @@
 # Keystone installation
 
 # Create Keystone database and grant previleges
-DB_ROOT_PASS="123"  # Replace with your MariaDB/MySQL root passwor
+DB_ROOT_PASS="123"  # Replace with your MariaDB/MySQL root password
 # Create the SQL commands to be executed
 SQL_COMMANDS=$(cat <<EOF
 CREATE DATABASE keystone;
@@ -27,6 +27,7 @@ echo "Database setup completed"
 
 # install the package
 sudo apt install keystone
+sleep 20
 
 #keystone configuration
 config_file="/etc/keystone/keystone.conf"

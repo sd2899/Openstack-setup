@@ -12,7 +12,7 @@ ETCD_IP="10.0.2.15"  # Replace with your etcd management IP address
 
 #---chrony---
 # install the chrony
-sudo apt install chrony
+sudo apt install chrony -y
 
 # Update chrony configuration
 CONFIG_FILE="/etc/chrony/chrony.conf"
@@ -40,7 +40,7 @@ chronyc sources
 
 #---MariaDB-----
 # install MariaDB
-sudo apt install mariadb-server python3-pymysql
+sudo apt install mariadb-server python3-pymysql -y
 
 # Configure MariaDB
 echo "Updating /etc/mysql/mariadb.conf.d/99-openstack.cnf..."
@@ -61,7 +61,7 @@ sudo systemctl restart mysql
 
 # ------Rabbit message queue------
 # Rabbit message queue installation and configuration
-sudo apt install rabbitmq-server
+sudo apt install rabbitmq-server -y
 
 # Add the openstack user and Replace RABBIT_PASS with a suitable password.
 rabbitmqctl add_user openstack R123
@@ -71,7 +71,7 @@ rabbitmqctl set_permissions openstack ".*" ".*" ".*"
 
 #-------memcached Server-------
 # install memcached server
-sudo apt install memcached python3-memcache
+sudo apt install memcached python3-memcache -y
 
 # Configure memcached
 CONFIG_FILE_mem="/etc/memcached.conf"
@@ -87,7 +87,7 @@ sudo systemctl restart memcached
 
 #-----etcd--------
 # install etcd 
-sudo apt install etcd
+sudo apt install etcd -y
 
 # Configure etcd
 CONFIG_FILE_etcd="/etc/default/etcd"
@@ -116,6 +116,6 @@ sudo systemctl restart etcd
 sudo add-apt-repository cloud-archive:bobcat
 
 #client installation
-sudo apt install python3-openstackclient
+sudo apt install python3-openstackclient -y
 
 echo "Openstack Prerequisites installation, Configuration and setup completed successfully!"

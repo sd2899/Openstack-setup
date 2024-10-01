@@ -101,7 +101,7 @@ sudo chmod -R 600 /var/lib/openstack-dashboard/secret_key
 sudo chown -R horizon:horizon /usr/share/openstack-dashboard/
 sudo chmod -R 755 /usr/share/openstack-dashboard/
 
-sudo su -s /bin/sh -c "python3 /usr/share/openstack-dashboard/manage.py collectstatic --noinput" horizon
+#sudo su -s /bin/sh -c "python3 /usr/share/openstack-dashboard/manage.py collectstatic --noinput" horizon
 
 conf_file1="/etc/apache2/conf-available/openstack-dashboard.conf"
 sudo bash -c "cat <<EOF >> $conf_file1

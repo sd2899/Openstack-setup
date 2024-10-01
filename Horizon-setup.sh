@@ -2,7 +2,7 @@
 
 #---create Horizon dashboard-----
 #Install the packages
-apt install openstack-dashboard -y
+sudo apt install openstack-dashboard -y
 
 # Configure the Openstack dashboard configuration file
 config_file="/etc/openstack-dashboard/local_settings.py"

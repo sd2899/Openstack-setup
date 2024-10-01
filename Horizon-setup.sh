@@ -16,7 +16,7 @@ echo 'OPENSTACK_HOST = "controller" ' >> $config_file
 
 #In the Dashboard configuration section, allow your hosts to access Dashboard.
 sudo sed -i "s/^.*ALLOWED_HOSTS = .*/# &/" "$config_file"
-echo "ALLOWED_HOSTS = ["*"] " >> $config_file
+echo 'ALLOWED_HOSTS = ["*"] ' >> "$config_file"
 
 #Configure the memcached session storage service:
 sudo sed -i "s/^.*SESSION_ENGINE = .*/# &/" "$config_file"
@@ -72,7 +72,7 @@ echo "WEBROOT='/horizon/'" >> $config_file
 # Enable support for domains:
 echo "OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True" >> $config_file
 
-sudo bash -c "cat <<EOF >> $config_file
+sudo bash -c 'cat <<EOF >> $config_file
 OPENSTACK_API_VERSIONS = {
     "identity": 3,
     "image": 2,
@@ -84,15 +84,24 @@ OPENSTACK_KEYSTONE_DEFAULT_ROLE = "user"
 
 OPENSTACK_NEUTRON_NETWORK = {
 	#...
-	'enable_router': True,
-	'enable_quotas': True,
-	'enable_ipv6': True,
-	'enable_distributed_router': True,
-	'enable_ha_router': True,
-	'enable_fip_topology_check': True,
+	"enable_router": True,
+	"enable_quotas": True,
+	"enable_ipv6": True,
+	"enable_distributed_router": True,
+	"enable_ha_router": True,
+	"enable_fip_topology_check": True,
 }
 
-EOF"
+EOF'
+
+sudo chown horizon:horizon /usr/lib/python3/dist-packages/openstack_dashboard/local/local_settings.py
+sudo chown -R horizon:horizon /var/lib/openstack-dashboard/
+sudo chmod -R 755 /var/lib/openstack-dashboard/
+sudo chmod -R 600 /var/lib/openstack-dashboard/secret_key
+sudo chown -R horizon:horizon /usr/share/openstack-dashboard/
+sudo chmod -R 755 /usr/share/openstack-dashboard/
+
+sudo su -s /bin/sh -c "python3 /usr/share/openstack-dashboard/manage.py collectstatic --noinput" horizon
 
 conf_file1="/etc/apache2/conf-available/openstack-dashboard.conf"
 sudo bash -c "cat <<EOF >> $conf_file1

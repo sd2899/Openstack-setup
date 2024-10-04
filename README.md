@@ -26,3 +26,5 @@ INFO oslo.privsep.daemon [None req-38e54b72-abb0-4cc0-95d4-71fc14020c45 - - - - 
 2024-10-04 12:00:57.585 31182 ERROR neutron.agent.dhcp.agent 
 2024-10-04 12:00:57.596 31182 ERROR neutron.agent.dhcp.agent [None req-c7eee30e-9338-4999-b8dd-9130367c197b - - - - - -] Unable to disable dhcp for be277f56-4c67-4dc7-82e9-f1cd1a12cfbf.: PermissionError: [Errno 13] Permission denied
 
+Unable to execute ['ovs-ofctl', 'add-flows', '-O', 'OpenFlow10', 'br-int', '-']. Exception: Exit code: 1; Cmd: ['ovs-ofctl', 'add-flows', '-O', 'OpenFlow10', 'br-int', '-']; Stdin: hard_timeout=0,idle_timeout=0,priority=0,table=71,cookie=4841432465141476094,actions=drop; Stdout: ; Stderr: ovs-ofctl: /var/run/openvswitch/br-int.mgmt: failed to open socket (Permission denied)
+

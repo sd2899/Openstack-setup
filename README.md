@@ -28,3 +28,24 @@ INFO oslo.privsep.daemon [None req-38e54b72-abb0-4cc0-95d4-71fc14020c45 - - - - 
 
 Unable to execute ['ovs-ofctl', 'add-flows', '-O', 'OpenFlow10', 'br-int', '-']. Exception: Exit code: 1; Cmd: ['ovs-ofctl', 'add-flows', '-O', 'OpenFlow10', 'br-int', '-']; Stdin: hard_timeout=0,idle_timeout=0,priority=0,table=71,cookie=4841432465141476094,actions=drop; Stdout: ; Stderr: ovs-ofctl: /var/run/openvswitch/br-int.mgmt: failed to open socket (Permission denied)
 
+
+ [None req-1018b209-3993-4cc4-88a4-2bec13cb17f3 - - - - - -] Synchronizing state complete
+2024-10-04 12:45:19.560 35196 INFO neutron.agent.dhcp.agent [None req-1018b209-3993-4cc4-88a4-2bec13cb17f3 - - - - - -] Synchronizing state
+2024-10-04 12:45:19.574 35196 INFO neutron.agent.dhcp.agent [None req-e5b99478-d68d-4224-9b41-510af1c0d3d5 - - - - - -] All active networks have been fetched through RPC.
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent [None req-608473be-4c32-49ef-b740-e26cf84d6f9a - - - - - -] Unable to disable dhcp for 421fc95a-791f-4a26-890d-41572e095e4a.: PermissionError: [Errno 13] Permission denied
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent Traceback (most recent call last):
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/neutron/agent/dhcp/agent.py", line 270, in _call_driver
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent     rv = getattr(driver, action)(**action_kwargs)
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/neutron/agent/linux/dhcp.py", line 375, in disable
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent     self._destroy_namespace_and_port()
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/neutron/agent/linux/dhcp.py", line 389, in _destroy_namespace_and_port
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent     ip_lib.delete_network_namespace(self.network.namespace)
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/neutron/agent/linux/ip_lib.py", line 963, in delete_network_namespace
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent     privileged.remove_netns(namespace, **kwargs)
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/oslo_privsep/priv_context.py", line 271, in _wrap
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent     return self.channel.remote_call(name, args, kwargs,
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/oslo_privsep/daemon.py", line 215, in remote_call
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent     raise exc_type(*result[2])
+2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent PermissionError: [Errno 13] Permission denied
+
+

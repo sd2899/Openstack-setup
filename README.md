@@ -68,3 +68,20 @@ Unable to execute ['ovs-ofctl', 'add-flows', '-O', 'OpenFlow10', 'br-int', '-'].
 2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task PermissionError: [Errno 13] Permission denied
 
 
+
+
+ERROR neutron.agent.dhcp.agent [None req-8800c3fc-c029-4ca3-bebe-9c7fc00f1ea6 - - - - - -] Unable to disable dhcp for b147ba7d-5756-4d06-88a8-10a7c4593ab1.: PermissionError: [Errno 13] Permission denied
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent Traceback (most recent call last):
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/neutron/agent/dhcp/agent.py", line 270, in _call_driver
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent     rv = getattr(driver, action)(**action_kwargs)
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/neutron/agent/linux/dhcp.py", line 375, in disable
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent     self._destroy_namespace_and_port()
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/neutron/agent/linux/dhcp.py", line 389, in _destroy_namespace_and_port
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent     ip_lib.delete_network_namespace(self.network.namespace)
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/neutron/agent/linux/ip_lib.py", line 963, in delete_network_namespace
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent     privileged.remove_netns(namespace, **kwargs)
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/oslo_privsep/priv_context.py", line 271, in _wrap
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent     return self.channel.remote_call(name, args, kwargs,
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent   File "/usr/lib/python3/dist-packages/oslo_privsep/daemon.py", line 215, in remote_call
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent     raise exc_type(*result[2])
+2024-10-04 17:00:07.629 71215 ERROR neutron.agent.dhcp.agent PermissionError: [Errno 13] Permission denied

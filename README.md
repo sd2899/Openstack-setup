@@ -49,3 +49,22 @@ Unable to execute ['ovs-ofctl', 'add-flows', '-O', 'OpenFlow10', 'br-int', '-'].
 2024-10-04 12:45:19.583 35196 ERROR neutron.agent.dhcp.agent PermissionError: [Errno 13] Permission denied
 
 
+ [None req-e630ade8-5546-466f-89a1-7d11da81826d - - - - - -] Error during L3NATAgentWithStateReport.periodic_sync_routers_task: PermissionError: [Errno 13] Permission denied
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task Traceback (most recent call last):
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task   File "/usr/lib/python3/dist-packages/oslo_service/periodic_task.py", line 216, in run_periodic_tasks
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task     task(self, context)
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task   File "/usr/lib/python3/dist-packages/neutron/agent/l3/agent.py", line 890, in periodic_sync_routers_task
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task     with self.namespaces_manager as ns_manager:
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task   File "/usr/lib/python3/dist-packages/neutron/agent/l3/namespace_manager.py", line 71, in __enter__
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task     self._all_namespaces = self.list_all()
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task   File "/usr/lib/python3/dist-packages/neutron/agent/l3/namespace_manager.py", line 117, in list_all
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task     namespaces = ip_lib.list_network_namespaces()
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task   File "/usr/lib/python3/dist-packages/neutron/agent/linux/ip_lib.py", line 972, in list_network_namespaces
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task     return privileged.list_netns(**kwargs)
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task   File "/usr/lib/python3/dist-packages/oslo_privsep/priv_context.py", line 271, in _wrap
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task     return self.channel.remote_call(name, args, kwargs,
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task   File "/usr/lib/python3/dist-packages/oslo_privsep/daemon.py", line 215, in remote_call
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task     raise exc_type(*result[2])
+2024-10-04 12:53:23.759 36745 ERROR oslo_service.periodic_task PermissionError: [Errno 13] Permission denied
+
+

@@ -373,7 +373,15 @@ sudo chown nova:nova -R /etc/nova/nova.conf
 sudo chmod -R 755 /etc/nova/nova.conf
 sudo chown nova:nova -R /var/lib/nova/instances/
 sudo chmod -R 755 /var/lib/nova/instances/
-	
+
+sudo add-apt-repository cloud-archive:bobcat
+usermod -aG libvirt $(whoami)
+usermod -aG libvirt nova
+systemctl enable --now libvirtd
+chown nova:nova /var/lib/nova/tmp/
+systemctl restart libvirtd
+systemctl restart nova-compute
+
 	
 	
 

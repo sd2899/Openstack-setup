@@ -258,6 +258,7 @@ target_helper = tgtadm
 volume_backend_name = lvm1
 iscsi_ip_address = 192.168.56.101"
 def="enabled_backends = lvm1, lvm2
+default_volume_type = lvm1
 glance_api_servers = http://controller:9292"
     	
 if [ -f "$config_file" ]; then

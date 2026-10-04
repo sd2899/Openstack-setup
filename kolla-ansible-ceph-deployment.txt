@@ -1,0 +1,86 @@
+apt -y update && apt -y upgrade
+apt install chrony
+
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+ 
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce
+systemctl start docker
+
+apt-get install ceph-common cephadm -y
+cephadm install
+
+cephadm bootstrap --mon-ip=172.32.17.23 \
+  --initial-dashboard-user Admin \
+  --initial-dashboard-password=Admin56# \
+  --dashboard-password-noupdate
+
+sudo /usr/sbin/cephadm shell --fsid 5eac4626-a049-11f0-b374-bc2411f114e8 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+cephadm add-repo --release reef; cephadm install ceph-common
+
+ceph config set mon public_network 172.20.0.23/22
+
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@storage2
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@storage3
+
+ceph orch host ls
+ceph orch host add storage2 172.32.17.11
+ceph orch host add storage3 172.32.17.105
+
+ceph orch apply mon "storage1,storage2,storage3"
+
+ceph orch host label add storage1 mon
+ceph orch host label add storage2 mon
+ceph orch host label add storage3 mon
+
+ceph orch device ls
+ceph orch apply osd --all-available-devices --method raw
+
+ceph orch host label add storage1 rgw
+ceph orch host label add storage2 rgw
+ceph orch host label add storage3 rgw
+
+ceph orch apply rgw radosgw --placement=label:rgw --port=8080
+radosgw-admin user list
+radosgw-admin user info --uid=dashboard
+ceph orch apply mgr --placement="storage1 storage2 storage3"
+ceph balancer on
+
+for pool_name in volumes images backups vms gnocchi
+do
+  ceph osd pool create $pool_name
+  rbd pool init $pool_name
+done
+
+rbd pool init volumes
+rbd pool init images
+rbd pool init vms
+rbd pool init gnocchi
+rbd pool init backup
+
+
+ceph auth get-or-create client.nova mon 'profile rbd' osd 'profile rbd pool=vms' mgr 'profile rbd pool=vms' > /root/ceph.client.nova.keyring
+ceph auth get-or-create client.gnocchi mon 'profile rbd' osd 'profile rbd pool=gnocchi' mgr 'profile rbd pool=gnocchi' > /root/ceph.client.gnocchi.keyring
+ceph auth get-or-create client.cinder-backup mon 'profile rbd' osd 'profile rbd pool=backups' mgr 'profile rbd pool=backups' > /root/ceph.client.cinder-backup.keyring
+ceph auth get-or-create client.cinder mon 'profile rbd' osd 'profile rbd pool=volumes, profile rbd pool=vms, profile rbd-read-only pool=images' mgr 'profile rbd pool=volumes, profile rbd pool=vms' > /root/ceph.client.cinder.keyring
+ceph auth get-or-create client.glance mon 'profile rbd' osd 'profile rbd pool=images' mgr 'profile rbd pool=images' > /root/ceph.client.glance.keyring
+scp /etc/ceph/ceph.conf root@172.20.0.104:/etc/kolla/config/nova
+scp ceph.client.nova.keyring  root@172.20.0.104:/etc/kolla/config/nova
+
+
+----On controller 1--------
+mkdir -p /etc/kolla/config/{nova,cinder,glance,gnocchi}
+mkdir cinder-backup cinder-volume
+for svc in glance-api cinder-volume nova-compute gnocchi-api; do
+  sudo mkdir -p /etc/kolla/${svc}/ceph
+done
